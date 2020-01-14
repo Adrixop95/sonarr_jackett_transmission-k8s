@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+spec:
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      labels:
+        app: sonarr
+    spec:
+      containers:
+      - name: sonarr
+        image: linuxserver/sonarr:preview
+        env:
+          - name: "PUID"
+            value: "1000"
+          - name: "PGID"
+            value: "1000"
+          - name: "TZ"
+            value: "Europe/Warsaw"
+          - name: "UMASK_SET"
+            value: "022"
+        volumeMounts:
+          - name: storage-sonarr
+            mountPath: /config
+          - name: storage-sonarr
+            mountPath: /tv
+          - name: storage-sonarr
+            mountPath: /downloads
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8989
+      
+      volumes:
+        - name: storage-sonarr
+          persistentVolumeClaim:
+              claimName: storage-sonarr

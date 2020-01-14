@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transmission
+spec:
+  selector:
+    matchLabels:
+      app: transmission
+  template:
+    metadata:
+      labels:
+        app: transmission
+    spec:
+      containers:
+      - name: transmission
+        image: linuxserver/transmission
+        env:
+          - name: "PUID"
+            value: "1000"
+          - name: "PGID"
+            value: "1000"
+          - name: "TZ"
+            value: "Europe/Warsaw"
+        volumeMounts:
+          - name: storage-transmission
+            mountPath: /config
+          - name: storage-transmission 
+            mountPath: /downloads
+          - name: storage-transmission
+            mountPath: /watch
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 9091
+        - containerPort: 51413
+    
+      volumes:
+        - name: storage-transmission
+          persistentVolumeClaim:
+            claimName: storage-transmission
