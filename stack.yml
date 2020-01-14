@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anime-stack
+spec:
+  selector:
+    matchLabels:
+      app: anime-stack
+  template:
+    metadata:
+      labels:
+        app: anime-stack
+    spec:
+      containers:
+      - name: sonarr
+        image: linuxserver/sonarr:preview
+        env:
+          - name: "PUID"
+            value: "1000"
+          - name: "PGID"
+            value: "1000"
+          - name: "TZ"
+            value: "Europe/Warsaw"
+          - name: "UMASK_SET"
+            value: "022"
+        volumeMounts:
+          - name: storage-sonarr
+            mountPath: /config
+          - name: storage-sonarr
+            mountPath: /tv
+          - name: storage-sonarr
+            mountPath: /downloads
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8989
+
+      - name: jackett
+        image: linuxserver/jackett
+        env:
+          - name: "PUID"
+            value: "1000"
+          - name: "PGID"
+            value: "1000"
+          - name: "TZ"
+            value: "Europe/Warsaw"
+        volumeMounts:
+          - name: storage-jackett
+            mountPath: /config
+          - name: storage-jackett
+            mountPath: /downloads
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 9117
+
+      - name: transmission
+        image: linuxserver/transmission
+        env:
+          - name: "PUID"
+            value: "1000"
+          - name: "PGID"
+            value: "1000"
+          - name: "TZ"
+            value: "Europe/Warsaw"
+        volumeMounts:
+          - name: storage-transmission
+            mountPath: /config
+          - name: storage-transmission 
+            mountPath: /downloads
+          - name: storage-transmission
+            mountPath: /watch
+        resources:
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        ports:
+        - containerPort: 9091
+        - containerPort: 51413
+    
+      volumes:
+        - name: storage-transmission
+          persistentVolumeClaim:
+            claimName: storage-transmission
+
+        - name: storage-jackett
+          persistentVolumeClaim:
+            claimName: storage-jackett
+            
+        - name: storage-sonarr
+          persistentVolumeClaim:
+              claimName: storage-sonarr
+
+
+
